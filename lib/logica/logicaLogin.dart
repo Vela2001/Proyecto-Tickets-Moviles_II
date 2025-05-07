@@ -12,7 +12,7 @@ class AuthService {
         email: email,
         password: password,
       );
-      
+
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(_handleAuthError(
