@@ -8,6 +8,7 @@ class Usuario {
   final DateTime fechaCreacion;
   final DateTime? ultimoLogin;
   final bool emailVerificado;
+  final String rol;
 
   Usuario({
     required this.id,
@@ -17,6 +18,7 @@ class Usuario {
     required this.fechaCreacion,
     this.ultimoLogin,
     this.emailVerificado = false,
+    required this.rol,
   });
 
   // Constructor desde Firestore
@@ -32,6 +34,7 @@ class Usuario {
           ? (data['ultimoLogin'] as Timestamp).toDate()
           : null,
       emailVerificado: data['emailVerificado'] ?? false,
+      rol: data['rol'] ?? 'usuario',
     );
   }
 
@@ -45,6 +48,7 @@ class Usuario {
       'ultimoLogin':
           ultimoLogin != null ? Timestamp.fromDate(ultimoLogin!) : null,
       'emailVerificado': emailVerificado,
+      'rol': rol,
     };
   }
 
@@ -58,6 +62,7 @@ class Usuario {
       fechaCreacion: fechaCreacion,
       ultimoLogin: loginTime,
       emailVerificado: emailVerificado,
+      rol: rol,
     );
   }
 }
