@@ -55,6 +55,7 @@ class AuthService {
     required String email,
     required String password,
     required String nombreCompleto,
+    String rol = 'usuario',
   }) async {
     try {
       // 1. Verificar si el username ya existe
@@ -85,6 +86,7 @@ class AuthService {
         nombreCompleto: nombreCompleto,
         fechaCreacion: DateTime.now(),
         emailVerificado: false,
+        rol: rol,
       );
 
       await _firestore
