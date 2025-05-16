@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'home_screen.dart';
-import 'register_screen.dart'; // Importamos la nueva pantalla de registro
+import 'register_screen.dart';
+import 'admin_tickets_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -38,15 +39,42 @@ class _LoginScreenState extends State<LoginScreen> {
       final userDoc = querySnapshot.docs.first;
       final email = userDoc['email'] as String;
 
+      // Autenticación con Firebase
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: _passwordController.text.trim(),
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
+      // Recuperamos el UID del usuario autenticado
+      final User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+
+        if (userSnapshot.exists) {
+          final rol = userSnapshot['rol'];
+
+          if (rol == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminTicketsScreen()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          }
+        } else {
+          setState(() {
+            _errorMessage = 'No se encontró el documento del usuario';
+          });
+        }
+      }
+
     } on FirebaseAuthException catch (e) {
       setState(() {
         _errorMessage = _getErrorMessage(e.code);
