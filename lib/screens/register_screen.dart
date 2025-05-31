@@ -62,6 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'username': _usernameController.text.trim(),
         'email': _emailController.text.trim(),
         'createdAt': FieldValue.serverTimestamp(),
+        'rol': 'usuario',
       });
 
       // 4. Navegar al home después de registro exitoso
