@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proyecto_moviles2/model/ticket_model.dart';
@@ -5,15 +6,15 @@ import 'package:proyecto_moviles2/services/ticket_service.dart';
 import 'package:proyecto_moviles2/screens/create_ticket_screen.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'dart:io'; // Asegúrate de tener esta importación
 import 'package:path_provider/path_provider.dart';
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ViewTicketsScreen extends StatefulWidget {
   final String userId;
-  final List<Ticket>? tickets; // Agregar la lista de tickets filtrados
+  final List<Ticket>? tickets; // Lista opcional para tickets filtrados
 
-  const ViewTicketsScreen({Key? key, required this.userId, this.tickets})
-      : super(key: key);
+  const ViewTicketsScreen({Key? key, required this.userId, this.tickets}) : super(key: key);
 
   @override
   State<ViewTicketsScreen> createState() => _ViewTicketsScreenState();
@@ -32,38 +33,36 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => setState(() {}),
+            tooltip: 'Refrescar',
           ),
         ],
       ),
       body: widget.tickets != null
-          ? _buildTicketsList(widget.tickets!) // Si hay tickets filtrados
+          ? _buildTicketsList(widget.tickets!)
           : StreamBuilder<List<Ticket>>(
               stream: _ticketService.obtenerTicketsPorUsuario(widget.userId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return _buildErrorWidget(snapshot.error.toString());
                 }
-
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return _buildEmptyState();
                 }
-
                 return _buildTicketsList(snapshot.data!);
               },
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateTicket(context),
+        tooltip: 'Crear Ticket',
         child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildErrorWidget(String error) {
-    debugPrint('Error al cargar tickets: $error');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -71,11 +70,7 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           const Icon(Icons.error_outline, size: 48, color: Colors.red),
           const SizedBox(height: 16),
           const Text('Error al cargar tickets'),
-          Text(
-            error,
-            style: const TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
-          ),
+          Text(error, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => setState(() {}),
@@ -115,25 +110,23 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           elevation: 2,
           child: ListTile(
             leading: _buildStatusIndicator(ticket.estado),
-            title: Text(
-              ticket.titulo,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(ticket.titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Estado: ${_capitalize(ticket.estado)}'),
                 Text('Creado: ${_dateFormat.format(ticket.fechaCreacion)}'),
-                if (ticket.prioridad != null)
-                  Text('Prioridad: ${_capitalize(ticket.prioridad)}'),
+                if (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
+                  Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
               ],
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.print),
+                  icon: const Icon(Icons.print),
                   onPressed: () => _generatePdf(ticket),
+                  tooltip: 'Generar PDF',
                 ),
                 const Icon(Icons.chevron_right),
               ],
@@ -150,10 +143,7 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
     return Container(
       width: 12,
       height: 12,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 
@@ -161,7 +151,7 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
     switch (status.toLowerCase()) {
       case 'pendiente':
         return Colors.orange;
-      case 'en_proceso':
+      case 'en proceso':
         return Colors.blue;
       case 'resuelto':
         return Colors.green;
@@ -178,50 +168,76 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
   void _navigateToCreateTicket(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CreateTicketScreen()),
+      MaterialPageRoute(builder: (_) =>  CreateTicketScreen()),
     );
   }
 
   void _navigateToTicketDetail(BuildContext context, Ticket ticket) {
-    // Implementa la navegación a la pantalla de detalle
-    // Navigator.push(context, MaterialPageRoute(
-    //   builder: (context) => TicketDetailScreen(ticket: ticket),
-    // ));
+    // Implementa navegación a detalle del ticket si tienes pantalla para ello
   }
 
-  // Función para generar el PDF del ticket
-  void _generatePdf(Ticket ticket) async {
-    final pdf = pw.Document();
+Future<void> _generatePdf(Ticket ticket) async {
+  final pdf = pw.Document();
 
-    // Crear el PDF
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Ticket: ${ticket.titulo}',
-                  style: pw.TextStyle(fontSize: 18)),
-              pw.SizedBox(height: 10),
-              pw.Text('Estado: ${_capitalize(ticket.estado)}'),
-              pw.Text('Prioridad: ${_capitalize(ticket.prioridad ?? '')}'),
-              pw.Text('Creado: ${_dateFormat.format(ticket.fechaCreacion)}'),
-              pw.SizedBox(height: 20),
-              pw.Text('Descripción:'),
-              pw.Text(ticket.descripcion),
-            ],
-          );
-        },
-      ),
+  pdf.addPage(
+    pw.Page(
+      build: (context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('Ticket', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 16),
+            pw.Text('Título: ${ticket.titulo}', style: pw.TextStyle(fontSize: 18)),
+            pw.SizedBox(height: 8),
+            pw.Text('Descripción: ${ticket.descripcion}', style: pw.TextStyle(fontSize: 14)),
+            pw.SizedBox(height: 8),
+            pw.Text('Estado: ${_capitalize(ticket.estado)}'),
+            pw.Text('Fecha de creación: ${_dateFormat.format(ticket.fechaCreacion)}'),
+            if (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
+              pw.Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
+          ],
+        );
+      },
+    ),
+  );
+
+  try {
+    final bytes = await pdf.save();
+
+    if (kIsWeb) {
+      // Descarga PDF en web
+      final blob = html.Blob([bytes], 'application/pdf');
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement()
+        ..href = url
+        ..download = 'ticket_${ticket.titulo}_${DateTime.now().millisecondsSinceEpoch}.pdf'
+        ..style.display = 'none';
+
+      html.document.body!.append(anchor);
+      anchor.click();
+      anchor.remove();
+      html.Url.revokeObjectUrl(url);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('PDF descargado')),
+      );
+    } else {
+      // Para Android/iOS/desktop (no web)
+      final output = await getApplicationDocumentsDirectory();
+      final file = File('${output.path}/ticket_${ticket.titulo}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      await file.writeAsBytes(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('PDF guardado en ${file.path}')),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error al generar PDF: $e')),
     );
-
-    // Guardar el PDF en la memoria del dispositivo o compartir
-    final outputFile = await getTemporaryDirectory();
-    final file = File("${outputFile.path}/ticket_${ticket.id}.pdf");
-
-    await file.writeAsBytes(await pdf.save());
-
-    print("PDF generado en: ${file.path}");
-    // Aquí puedes agregar lógica para mostrar una notificación o compartir el archivo si lo deseas.
   }
 }
+
+}
+
+
