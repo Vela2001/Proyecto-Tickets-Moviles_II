@@ -147,4 +147,26 @@ class TicketService {
         .map((snapshot) =>
             snapshot.docs.map((doc) => Ticket.fromFirestore(doc)).toList());
   }
+ 
+Future<List<Ticket>> buscarTicketsPorTituloYUsuarioLocal(String titulo, String userId) async {
+  try {
+    final querySnapshot = await _firestore
+      .collection('tickets')
+      .where('userId', isEqualTo: userId)
+      .get();
+
+    final tickets = querySnapshot.docs.map((doc) => Ticket.fromFirestore(doc)).toList();
+
+    // Filtrar localmente por título, insensible a mayúsculas
+    final filteredTickets = tickets.where((ticket) =>
+      ticket.titulo.toLowerCase().contains(titulo.toLowerCase())
+    ).toList();
+
+    return filteredTickets;
+  } catch (e) {
+    throw Exception('Error al buscar tickets por título y usuario local: $e');
+  }
+}
+
+
 }
