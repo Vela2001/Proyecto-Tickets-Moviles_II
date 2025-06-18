@@ -9,19 +9,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  # Firebase (últimas versiones estables)
+
+  # Firebase
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.3
   cloud_firestore: ^5.6.7
+
+  # Otras dependencias
   pdf: ^3.6.0
   printing: ^5.6.0
-  path_provider: ^2.0.11  
-  # Otras dependencias
+  path_provider: ^2.0.11
   intl: ^0.20.2
   image_picker: ^1.0.4
   flutter_local_notifications: ^19.2.0
   permission_handler: ^12.0.0+1
+  http: ^1.2.1
+  # Usamos flutter_config para variables de entorno
+  flutter_config: ^2.0.2
+  flutter_dotenv: ^5.0.2
+
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +36,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - .env
