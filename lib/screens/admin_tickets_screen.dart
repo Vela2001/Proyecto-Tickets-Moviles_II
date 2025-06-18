@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles2/model/ticket_model.dart';
 import 'package:proyecto_moviles2/services/ticket_service.dart';
+import 'package:proyecto_moviles2/services/auth_service.dart';
+import 'package:proyecto_moviles2/screens/login_screen.dart';
 
 class AdminTicketsScreen extends StatefulWidget {
   @override
@@ -13,7 +15,23 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Administrar Tickets')),
+      appBar: AppBar(
+        title: Text('Administrar Tickets'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              await AuthService()
+                  .signOut(); // o FirebaseAuth.instance.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(
