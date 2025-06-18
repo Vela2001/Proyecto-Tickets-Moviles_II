@@ -17,62 +17,80 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
 
   Future<void> _login() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Por favor, ingrese usuario y contraseña';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
+      // Buscar usuario por username
       final querySnapshot = await FirebaseFirestore.instance
           .collection('usuarios')
-          .where('username', isEqualTo: _usernameController.text.trim())
+          .where('username', isEqualTo: username)
           .limit(1)
           .get();
 
       if (querySnapshot.docs.isEmpty) {
-        throw FirebaseAuthException(
-          code: 'user-not-found',
-          message: 'Usuario no encontrado',
-        );
+        setState(() {
+          _errorMessage = 'Usuario no encontrado';
+          _isLoading = false;
+        });
+        return;
       }
 
       final userDoc = querySnapshot.docs.first;
       final email = userDoc['email'] as String;
 
-      // Autenticación con Firebase
+      // Autenticación con Firebase usando email y contraseña
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
-        password: _passwordController.text.trim(),
+        password: password,
       );
 
-      // Recuperamos el UID del usuario autenticado
-      final User? user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        setState(() {
+          _errorMessage = 'Error al autenticar usuario';
+          _isLoading = false;
+        });
+        return;
+      }
 
-      if (user != null) {
-        final DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-            .collection('usuarios')
-            .doc(user.uid)
-            .get();
+      // Obtener rol del usuario desde Firestore
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .get();
 
-        if (userSnapshot.exists) {
-          final rol = userSnapshot['rol'];
+      if (!userSnapshot.exists) {
+        setState(() {
+          _errorMessage = 'No se encontró información del usuario en la base de datos.';
+          _isLoading = false;
+        });
+        return;
+      }
 
-          if (rol == 'admin') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => AdminTicketsScreen()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
-            );
-          }
-        } else {
-          setState(() {
-            _errorMessage = 'No se encontró el documento del usuario';
-          });
-        }
+      final rol = userSnapshot.get('rol');
+      if (rol == 'admin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AdminTicketsScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -94,7 +112,9 @@ class _LoginScreenState extends State<LoginScreen> {
       case 'wrong-password':
         return 'Contraseña incorrecta';
       case 'invalid-email':
-        return 'Nombre de usuario inválido';
+        return 'Correo electrónico inválido';
+      case 'network-request-failed':
+        return 'Error de red. Verifique su conexión.';
       default:
         return 'Error al iniciar sesión';
     }
@@ -121,6 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 labelText: 'Nombre de usuario',
                 border: OutlineInputBorder(),
               ),
+              textInputAction: TextInputAction.next,
             ),
             SizedBox(height: 16),
             TextField(
@@ -130,6 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
+              onSubmitted: (_) => _login(),
             ),
             if (_errorMessage != null) ...[
               SizedBox(height: 16),
