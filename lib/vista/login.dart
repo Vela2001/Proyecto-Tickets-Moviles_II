@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles2/logica/firebaseAuth.dart';
+import 'package:proyecto_moviles2/logica/recuperarcontrase%C3%B1a.dart';
 import 'dashboard.dart';
 import 'package:proyecto_moviles2/logica/register.dart';
+import 'package:proyecto_moviles2/logica/recuperarcontraseña.dart'; // Asegúrate de importar tu pantalla de recuperación
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -87,7 +89,29 @@ class _LoginPageState extends State<LoginPage> {
                     icon: Icons.lock_outline,
                     obscure: true,
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+                  // Botón de "Olvidé mi contraseña" añadido aquí
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        '¿Olvidaste tu contraseña?',
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   _isLoading
                       ? const CircularProgressIndicator(
                           color: Colors.blueAccent)
