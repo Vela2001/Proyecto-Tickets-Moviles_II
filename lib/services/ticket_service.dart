@@ -120,6 +120,27 @@ class TicketService {
     }
   }
 
+  Future<void> actualizarTicket(Ticket ticket) async {
+    try {
+      await _firestore.collection('tickets').doc(ticket.id).update({
+        'titulo': ticket.titulo,
+        'estado': ticket.estado,
+        'prioridad': ticket.prioridad,
+        'fechaActualizacion': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Error al actualizar el ticket: ${e.toString()}');
+    }
+  }
+
+  Future<void> eliminarTicket(String ticketId) async {
+    try {
+      await _firestore.collection('tickets').doc(ticketId).delete();
+    } catch (e) {
+      throw Exception('Error al eliminar el ticket: ${e.toString()}');
+    }
+  }
+
   // Obtener comentarios de un ticket
   Stream<List<Comentario>> obtenerComentarios(String ticketId) {
     return _firestore

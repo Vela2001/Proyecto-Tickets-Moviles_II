@@ -3,6 +3,7 @@ import 'package:proyecto_moviles2/model/ticket_model.dart';
 import 'package:proyecto_moviles2/services/ticket_service.dart';
 import 'package:proyecto_moviles2/services/auth_service.dart';
 import 'package:proyecto_moviles2/screens/login_screen.dart';
+import 'package:proyecto_moviles2/screens/admin_ticket_detail_screen.dart';
 
 class AdminTicketsScreen extends StatefulWidget {
   @override
@@ -89,15 +90,55 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
                     Text('Prioridad: ${ticket.prioridad}'),
                   ],
                 ),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  // Navegar a pantalla de detalle para administrador
-                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AdminTicketDetailScreen(ticket: ticket),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _confirmarEliminar(ticket),
+                    ),
+                  ],
+                ),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  void _confirmarEliminar(Ticket ticket) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('¿Eliminar Ticket?'),
+        content: Text('¿Estás seguro de que deseas eliminar este ticket?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await TicketService().eliminarTicket(ticket.id);
+              Navigator.pop(context);
+            },
+            child: Text('Eliminar'),
+          ),
+        ],
+      ),
     );
   }
 }
