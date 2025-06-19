@@ -7,14 +7,16 @@ import 'package:proyecto_moviles2/screens/create_ticket_screen.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
-import 'dart:html' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:open_filex/open_filex.dart'; // No olvides instalarlo
 
 class ViewTicketsScreen extends StatefulWidget {
   final String userId;
-  final List<Ticket>? tickets; // Lista opcional para tickets filtrados
+  final List<Ticket>? tickets;
 
-  const ViewTicketsScreen({Key? key, required this.userId, this.tickets}) : super(key: key);
+  const ViewTicketsScreen({Key? key, required this.userId, this.tickets})
+    : super(key: key);
 
   @override
   State<ViewTicketsScreen> createState() => _ViewTicketsScreenState();
@@ -37,23 +39,24 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           ),
         ],
       ),
-      body: widget.tickets != null
-          ? _buildTicketsList(widget.tickets!)
-          : StreamBuilder<List<Ticket>>(
-              stream: _ticketService.obtenerTicketsPorUsuario(widget.userId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return _buildErrorWidget(snapshot.error.toString());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return _buildEmptyState();
-                }
-                return _buildTicketsList(snapshot.data!);
-              },
-            ),
+      body:
+          widget.tickets != null
+              ? _buildTicketsList(widget.tickets!)
+              : StreamBuilder<List<Ticket>>(
+                stream: _ticketService.obtenerTicketsPorUsuario(widget.userId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return _buildErrorWidget(snapshot.error.toString());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return _buildTicketsList(snapshot.data!);
+                },
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToCreateTicket(context),
         tooltip: 'Crear Ticket',
@@ -70,7 +73,11 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           const Icon(Icons.error_outline, size: 48, color: Colors.red),
           const SizedBox(height: 16),
           const Text('Error al cargar tickets'),
-          Text(error, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
+          Text(
+            error,
+            style: const TextStyle(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => setState(() {}),
@@ -110,7 +117,10 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
           elevation: 2,
           child: ListTile(
             leading: _buildStatusIndicator(ticket.estado),
-            title: Text(ticket.titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              ticket.titulo,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -168,76 +178,132 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
   void _navigateToCreateTicket(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) =>  CreateTicketScreen()),
+      MaterialPageRoute(builder: (_) => CreateTicketScreen()),
     );
   }
 
   void _navigateToTicketDetail(BuildContext context, Ticket ticket) {
-    // Implementa navegación a detalle del ticket si tienes pantalla para ello
+    // Aquí puedes implementar una pantalla de detalle si deseas
   }
 
-Future<void> _generatePdf(Ticket ticket) async {
-  final pdf = pw.Document();
+  /// ✅ Función corregida: solo guarda PDF local en Android/iOS
+  Future<void> _generatePdf(Ticket ticket) async {
+    final pdf = pw.Document();
 
-  pdf.addPage(
-    pw.Page(
-      build: (context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text('Ticket', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 16),
-            pw.Text('Título: ${ticket.titulo}', style: pw.TextStyle(fontSize: 18)),
-            pw.SizedBox(height: 8),
-            pw.Text('Descripción: ${ticket.descripcion}', style: pw.TextStyle(fontSize: 14)),
-            pw.SizedBox(height: 8),
-            pw.Text('Estado: ${_capitalize(ticket.estado)}'),
-            pw.Text('Fecha de creación: ${_dateFormat.format(ticket.fechaCreacion)}'),
-            if (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
-              pw.Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
-          ],
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Ticket de soporte',
+                style: pw.TextStyle(
+                  fontSize: 26,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(16),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey600),
+                  borderRadius: pw.BorderRadius.circular(10),
+                  color: PdfColors.grey100,
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      'Título:',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      ticket.titulo,
+                      style: const pw.TextStyle(fontSize: 16),
+                    ),
+                    pw.SizedBox(height: 10),
+
+                    pw.Text(
+                      'Descripción:',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      ticket.descripcion,
+                      style: const pw.TextStyle(fontSize: 14),
+                    ),
+                    pw.SizedBox(height: 10),
+
+                    pw.Text(
+                      'Fecha de creación:',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(_dateFormat.format(ticket.fechaCreacion)),
+                    pw.SizedBox(height: 10),
+
+                    pw.Text(
+                      'Estado:',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(_capitalize(ticket.estado)),
+                    pw.SizedBox(height: 10),
+
+                    if (ticket.prioridad != null &&
+                        ticket.prioridad!.isNotEmpty) ...[
+                      pw.Text(
+                        'Prioridad:',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                      pw.Text(_capitalize(ticket.prioridad!)),
+                    ],
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 40),
+              pw.Text(
+                '',
+                style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    try {
+      final bytes = await pdf.save();
+
+      // Solicita permiso
+      if (await Permission.storage.request().isDenied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Permiso de almacenamiento denegado')),
         );
-      },
-    ),
-  );
+        return;
+      }
 
-  try {
-    final bytes = await pdf.save();
+      // Guarda en carpeta Descargas
+      final downloadsDir = Directory('/storage/emulated/0/Download');
+      if (!await downloadsDir.exists()) {
+        await downloadsDir.create(recursive: true);
+      }
 
-    if (kIsWeb) {
-      // Descarga PDF en web
-      final blob = html.Blob([bytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      final anchor = html.AnchorElement()
-        ..href = url
-        ..download = 'ticket_${ticket.titulo}_${DateTime.now().millisecondsSinceEpoch}.pdf'
-        ..style.display = 'none';
-
-      html.document.body!.append(anchor);
-      anchor.click();
-      anchor.remove();
-      html.Url.revokeObjectUrl(url);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PDF descargado')),
-      );
-    } else {
-      // Para Android/iOS/desktop (no web)
-      final output = await getApplicationDocumentsDirectory();
-      final file = File('${output.path}/ticket_${ticket.titulo}_${DateTime.now().millisecondsSinceEpoch}.pdf');
+      final filePath =
+          '${downloadsDir.path}/ticket_${ticket.titulo}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final file = File(filePath);
       await file.writeAsBytes(bytes);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('PDF guardado en ${file.path}')),
+        SnackBar(content: Text('PDF guardado en Descargas:\n$filePath')),
       );
+
+      // Abre el PDF
+      await OpenFilex.open(file.path);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al generar PDF: $e')));
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error al generar PDF: $e')),
-    );
   }
 }
-
-}
-
-
