@@ -138,7 +138,7 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
                   onPressed: () => _generatePdf(ticket),
                   tooltip: 'Generar PDF',
                 ),
-                const Icon(Icons.chevron_right),
+                //const Icon(Icons.chevron_right),
               ],
             ),
             onTap: () => _navigateToTicketDetail(context, ticket),
