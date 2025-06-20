@@ -13,7 +13,16 @@ class AdminTicketsScreen extends StatefulWidget {
 }
 
 class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
+  String _searchQuery = '';
+  TextEditingController _searchController = TextEditingController();
+
   String _filterStatus = 'todos';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +61,33 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
               },
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Buscar por título o nombre de usuario',
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchQuery = '';
+                            _searchController.clear();
+                          });
+                        },
+                      )
+                    : null,
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase().trim();
+                });
+              },
+            ),
+          ),
+          SizedBox(height: 10),
           ElevatedButton(
             child: Text('Gestionar Usuarios'),
             onPressed: () {
@@ -86,16 +122,27 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
         }
 
         final tickets = snapshot.data!;
+        final filteredTickets = tickets.where((ticket) {
+          final titulo = ticket.titulo.toLowerCase();
+          final nombre = ticket.usuarioNombre.toLowerCase();
+          return titulo.contains(_searchQuery) || nombre.contains(_searchQuery);
+        }).toList();
+
+        if (filteredTickets.isEmpty) {
+          return Center(
+              child: Text('No hay tickets que coincidan con la búsqueda'));
+        }
 
         return ListView.builder(
-          itemCount: (_filterStatus == 'todos' ? 1 : 0) + tickets.length,
+          itemCount:
+              (_filterStatus == 'todos' ? 1 : 0) + filteredTickets.length,
           itemBuilder: (context, index) {
             if (_filterStatus == 'todos' && index == 0) {
-              return DashboardWidget(tickets: tickets);
+              return DashboardWidget(
+                  tickets: tickets); // NOTA: aquí sí van todos
             }
-
             final ticket =
-                tickets[_filterStatus == 'todos' ? index - 1 : index];
+                filteredTickets[_filterStatus == 'todos' ? index - 1 : index];
             return Card(
               child: ListTile(
                 title: Text(ticket.titulo),
