@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: '>=3.6.1 <4.0.0'
+  sdk: '^3.7.0'
 
 dependencies:
   flutter:
@@ -24,10 +24,10 @@ dependencies:
   flutter_local_notifications: ^19.2.0
   permission_handler: ^12.0.0+1
   http: ^1.2.1
-  # Usamos flutter_config para variables de entorno
-  flutter_config: ^2.0.2
   flutter_dotenv: ^5.0.2
 
+  # Para abrir PDFs desde la app
+  open_filex: ^4.3.2
 
 dev_dependencies:
   flutter_test:

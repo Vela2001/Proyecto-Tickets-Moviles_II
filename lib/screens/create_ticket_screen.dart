@@ -14,10 +14,11 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   String _priority = 'media';
-  String _category = 'general';
+  String _category = 'Mesa de Partes';
   bool _isLoading = false;
   bool _priorityDetermined = false;
   bool _canCreateTicket = false;
+  String? _recommendation;
   final TicketService _ticketService = TicketService();
 
   @override
@@ -61,8 +62,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
               const SizedBox(height: 16),
               if (_priorityDetermined)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
                     color: _getPriorityColor(_priority),
                     borderRadius: BorderRadius.circular(20),
@@ -75,23 +75,78 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                     ),
                   ),
                 ),
+
+              if (_priorityDetermined && _recommendation != null)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _recommendation!,
+                          style: const TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _category,
-                items: ['general', 'login', 'pago', 'tecnico']
-                    .map(
-                      (cat) => DropdownMenuItem(
-                        value: cat,
-                        child: Text(cat.toUpperCase()),
-                      ),
-                    )
-                    .toList(),
+                items: [
+                  'Mesa de Partes',
+                  'Portería de Ingreso de Personal',
+                  'Equipo Funcional de Archivo Central',
+                  'Gerencia Municipal',
+                  'Secretaria de Gerencia Municipal',
+                  'Gerencia de Administracion y Finanzas',
+                  'Sub Gerencia de Tesoreria',
+                  'Sub Gerencia de Recursos Humanos',
+                  'Sub Gerencia de Abastecimiento',
+                  'Sub Gerencia de Bienes Patrimoniales',
+                  'Sub Gerencia de Contabilidad',
+                  'Gerencia de Administracion Tributaria',
+                  'Sub Gerencia de Ejecutoria Coactiva',
+                  'Gerencia de Desarrollo Urbano e Infraestructura',
+                  'Sub Gerencia de Estudios de Inversiones',
+                  'Sub Gerencia de Planeamiento Urbano y Catastro',
+                  'Gerencia de Asesoria Juridica',
+                  'Gerencia de Planeamiento, Presupuesto y Desarrollo Organizacional',
+                  'Equipo Funcional de Tecnologias de la Informacion y Comunicaciones',
+                  'Gerencia de Desarrollo Social y Economico',
+                  'Sub Gerencia de Gestion Ambiental y Mantenimiento',
+                  'SISFOH',
+                  'DEMUNA',
+                  'Almacen Central',
+                  'Sub Gerencia de Serenazgo Municipal',
+                  'Servicio Cementerio General',
+                  'Servicio Equipo Mecanico',
+                  'Sub Gerencia de Desarrollo Economico y Turismo',
+                ].map(
+                  (area) => DropdownMenuItem(
+                    value: area,
+                    child: Text(area),
+                  ),
+                ).toList(),
                 onChanged: (value) => setState(() => _category = value!),
                 decoration: const InputDecoration(
-                  labelText: 'Categoría',
+                  labelText: 'Áreas de la Municipalidad',
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 24),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -142,12 +197,17 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
   Future<void> _analyzePriority() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _recommendation = null; // Limpiar recomendación previa
+    });
 
     try {
       final description = _descriptionController.text;
-      _priority = await _determinePriorityWithAI(description);
+      final result = await _determinePriorityWithAI(description);
       setState(() {
+        _priority = result['priority']!;
+        _recommendation = result['recommendation'];
         _priorityDetermined = true;
         _canCreateTicket = true;
       });
@@ -189,8 +249,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text('Ticket creado con prioridad ${_priority.toUpperCase()}!'),
+          content: Text('Ticket creado con prioridad ${_priority.toUpperCase()}!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -207,46 +266,55 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
     }
   }
 
- Future<String> _determinePriorityWithAI(String description) async {
-  final apiKey = dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
+  Future<Map<String, String>> _determinePriorityWithAI(String description) async {
+    final apiKey = dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
 
-  if (apiKey.isEmpty) {
-    throw Exception('API Key de Hugging Face no configurada.');
-  }
-
-  final response = await http.post(
-    Uri.parse(
-        'https://api-inference.huggingface.co/models/nlptown/bert-base-multilingual-uncased-sentiment'),
-    headers: {
-      'Authorization': 'Bearer $apiKey',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({'inputs': description}),
-  );
-
-  if (response.statusCode == 200) {
-    final List<dynamic> outerList = jsonDecode(response.body);
-
-    if (outerList.isNotEmpty && outerList[0] is List && outerList[0].isNotEmpty) {
-      final List<dynamic> predictions = outerList[0];
-
-      // La predicción más probable es la primera en la lista
-      final bestPrediction = predictions[0];
-      final label = bestPrediction['label'] as String;
-
-      // Mapeo de estrellas a prioridad
-      if (label.startsWith('1') || label.startsWith('2')) return 'alta';
-      if (label.startsWith('3')) return 'media';
-      if (label.startsWith('4') || label.startsWith('5')) return 'baja';
-
-      return 'media'; // default
-    } else {
-      throw Exception('Respuesta inesperada: lista vacía o mal formato.');
+    if (apiKey.isEmpty) {
+      throw Exception('API Key de Hugging Face no configurada.');
     }
-  } else {
-    throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
+
+    final response = await http.post(
+      Uri.parse(
+          'https://api-inference.huggingface.co/models/nlptown/bert-base-multilingual-uncased-sentiment'),
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'inputs': description}),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> outerList = jsonDecode(response.body);
+
+      if (outerList.isNotEmpty && outerList[0] is List && outerList[0].isNotEmpty) {
+        final List<dynamic> predictions = outerList[0];
+
+        final bestPrediction = predictions[0];
+        final label = bestPrediction['label'] as String;
+
+        String priority;
+        String recommendation;
+
+        if (label.startsWith('1') || label.startsWith('2')) {
+          priority = 'alta';
+          recommendation = 'Por favor, contacte al soporte técnico de inmediato.';
+        } else if (label.startsWith('3')) {
+          priority = 'media';
+          recommendation = 'Revise los procedimientos estándar y reintente.';
+        } else if (label.startsWith('4') || label.startsWith('5')) {
+          priority = 'baja';
+          recommendation = 'Puede esperar una respuesta en las próximas 48 horas.';
+        } else {
+          priority = 'media';
+          recommendation = 'Por favor, espere mientras evaluamos su caso.';
+        }
+
+        return {'priority': priority, 'recommendation': recommendation};
+      } else {
+        throw Exception('Respuesta inesperada: lista vacía o mal formato.');
+      }
+    } else {
+      throw Exception('Error HTTP ${response.statusCode}: ${response.body}');
+    }
   }
-}
-
-
 }
