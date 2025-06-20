@@ -4,6 +4,8 @@ import 'package:proyecto_moviles2/services/ticket_service.dart';
 import 'package:proyecto_moviles2/services/auth_service.dart';
 import 'package:proyecto_moviles2/screens/login_screen.dart';
 import 'package:proyecto_moviles2/screens/admin_ticket_detail_screen.dart';
+import 'package:proyecto_moviles2/screens/admin_users_screen.dart';
+import 'package:proyecto_moviles2/widgets/dashboard_widget.dart';
 
 class AdminTicketsScreen extends StatefulWidget {
   @override
@@ -50,6 +52,15 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
               },
             ),
           ),
+          ElevatedButton(
+            child: Text('Gestionar Usuarios'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => AdminUsersScreen()),
+              );
+            },
+          ),
           Expanded(
             child: _buildTicketsList(),
           ),
@@ -76,44 +87,51 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
 
         final tickets = snapshot.data!;
 
-        return ListView.builder(
-          itemCount: tickets.length,
-          itemBuilder: (context, index) {
-            final ticket = tickets[index];
-            return Card(
-              child: ListTile(
-                title: Text(ticket.titulo),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Estado: ${ticket.estado}'),
-                    Text('Prioridad: ${ticket.prioridad}'),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AdminTicketDetailScreen(ticket: ticket),
+        return Column(
+          children: [
+            if (_filterStatus == 'todos') DashboardWidget(tickets: tickets),
+            Expanded(
+              child: ListView.builder(
+                itemCount: tickets.length,
+                itemBuilder: (context, index) {
+                  final ticket = tickets[index];
+                  return Card(
+                    child: ListTile(
+                      title: Text(ticket.titulo),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Estado: ${ticket.estado}'),
+                          Text('Prioridad: ${ticket.prioridad}'),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AdminTicketDetailScreen(ticket: ticket),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _confirmarEliminar(ticket),
+                          ),
+                        ],
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _confirmarEliminar(ticket),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         );
       },
     );

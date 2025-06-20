@@ -14,6 +14,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _nombreCompletoController = TextEditingController();
+
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -61,7 +63,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .set({
         'username': _usernameController.text.trim(),
         'email': _emailController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
+        'nombreCompleto': _nombreCompletoController.text.trim(),
+        'fechaCreacion': FieldValue.serverTimestamp(),
         'rol': 'usuario',
       });
 
@@ -125,6 +128,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                     if (value.length < 4) {
                       return 'El nombre debe tener al menos 4 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  controller: _nombreCompletoController,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre completo',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingresa tu nombre completo';
                     }
                     return null;
                   },

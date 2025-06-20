@@ -29,7 +29,9 @@ class Usuario {
       username: data['username'] ?? '',
       email: data['email'] ?? '',
       nombreCompleto: data['nombreCompleto'] ?? '',
-      fechaCreacion: (data['fechaCreacion'] as Timestamp).toDate(),
+      fechaCreacion: data['fechaCreacion'] != null
+          ? (data['fechaCreacion'] as Timestamp).toDate()
+          : DateTime.now(),
       ultimoLogin: data['ultimoLogin'] != null
           ? (data['ultimoLogin'] as Timestamp).toDate()
           : null,
