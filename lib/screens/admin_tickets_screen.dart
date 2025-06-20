@@ -87,51 +87,49 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
 
         final tickets = snapshot.data!;
 
-        return Column(
-          children: [
-            if (_filterStatus == 'todos') DashboardWidget(tickets: tickets),
-            Expanded(
-              child: ListView.builder(
-                itemCount: tickets.length,
-                itemBuilder: (context, index) {
-                  final ticket = tickets[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(ticket.titulo),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Estado: ${ticket.estado}'),
-                          Text('Prioridad: ${ticket.prioridad}'),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      AdminTicketDetailScreen(ticket: ticket),
-                                ),
-                              );
-                            },
+        return ListView.builder(
+          itemCount: (_filterStatus == 'todos' ? 1 : 0) + tickets.length,
+          itemBuilder: (context, index) {
+            if (_filterStatus == 'todos' && index == 0) {
+              return DashboardWidget(tickets: tickets);
+            }
+
+            final ticket =
+                tickets[_filterStatus == 'todos' ? index - 1 : index];
+            return Card(
+              child: ListTile(
+                title: Text(ticket.titulo),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Estado: ${ticket.estado}'),
+                    Text('Prioridad: ${ticket.prioridad}'),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AdminTicketDetailScreen(ticket: ticket),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmarEliminar(ticket),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _confirmarEliminar(ticket),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         );
       },
     );

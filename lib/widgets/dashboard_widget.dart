@@ -30,13 +30,9 @@ class DashboardWidget extends StatelessWidget {
             spacing: 10,
             runSpacing: 10,
             children: [
-              _buildCard('Total', total, Colors.blue),
-              _buildCard('Pendientes', pendientes, Colors.orange),
-              _buildCard('En Proceso', enProceso, Colors.amber),
-              _buildCard('Resueltos', resueltos, Colors.green),
-              _buildCard('Alta Prioridad', altas, Colors.red),
-              _buildCard('Media Prioridad', medias, Colors.blueGrey),
-              _buildCard('Baja Prioridad', bajas, Colors.grey),
+              _buildCard('Pendientes', pendientes, total, Colors.orange),
+              _buildCard('En Proceso', enProceso, total, Colors.amber),
+              _buildCard('Resueltos', resueltos, total, Colors.green),
             ],
           ),
         ],
@@ -44,19 +40,27 @@ class DashboardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(String label, int count, Color color) {
+  Widget _buildCard(String label, int count, int total, Color color) {
+    final double porcentaje = total > 0 ? count / total : 0;
+
     return Card(
-      color: color.withOpacity(0.2),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$count',
-                style: TextStyle(
-                    fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+            Text(label,
+                style: TextStyle(fontWeight: FontWeight.bold, color: color)),
             SizedBox(height: 4),
-            Text(label, style: TextStyle(color: color)),
+            LinearProgressIndicator(
+              value: porcentaje,
+              backgroundColor: color.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+              minHeight: 8,
+            ),
+            SizedBox(height: 4),
+            Text('$count tickets (${(porcentaje * 100).toStringAsFixed(1)}%)',
+                style: TextStyle(color: Colors.black87)),
           ],
         ),
       ),
