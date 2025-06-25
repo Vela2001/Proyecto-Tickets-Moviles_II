@@ -30,15 +30,36 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mis Tickets'),
+        backgroundColor: const Color(0xFF3B5998),
+        elevation: 4,
+        automaticallyImplyLeading: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Mis Tickets',
+              style: TextStyle(fontSize: 22, color: Colors.white),
+            ),
+            Text(
+              DateFormat('dd/MM/yyyy').format(DateTime.now()),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Colors.white70,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () => setState(() {}),
             tooltip: 'Refrescar',
           ),
         ],
       ),
+
       body:
           widget.tickets != null
               ? _buildTicketsList(widget.tickets!)
@@ -108,44 +129,99 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
 
   Widget _buildTicketsList(List<Ticket> tickets) {
     return ListView.builder(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       itemCount: tickets.length,
       itemBuilder: (context, index) {
         final ticket = tickets[index];
+
         return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: ListTile(
-            leading: _buildStatusIndicator(ticket.estado),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
+            leading:
+                (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
+                    ? Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(ticket.prioridad!),
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                    : const Icon(
+                      Icons.priority_high,
+                      color: Colors.grey,
+                    ), // Icono si no hay prioridad
             title: Text(
               ticket.titulo,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Estado: ${_capitalize(ticket.estado)}'),
-                Text('Creado: ${_dateFormat.format(ticket.fechaCreacion)}'),
-                if (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
-                  Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.flag, size: 16, color: Colors.blueGrey),
+                    const SizedBox(width: 4),
+                    Text('Estado: ${_capitalize(ticket.estado)}'),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.date_range,
+                      size: 16,
+                      color: Colors.blueGrey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text('Creado: ${_dateFormat.format(ticket.fechaCreacion)}'),
+                  ],
+                ),
+                if (ticket.prioridad != null &&
+                    ticket.prioridad!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.bolt, size: 16, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
+                    ],
+                  ),
+                ],
               ],
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.print),
-                  onPressed: () => _generatePdf(ticket),
-                  tooltip: 'Generar PDF',
-                ),
-                //const Icon(Icons.chevron_right),
-              ],
+            trailing: IconButton(
+              icon: const Icon(Icons.print),
+              onPressed: () => _generatePdf(ticket),
+              tooltip: 'Generar PDF',
             ),
             onTap: () => _navigateToTicketDetail(context, ticket),
           ),
         );
       },
     );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority.toLowerCase()) {
+      case 'baja':
+        return Colors.green;
+      case 'media':
+        return Colors.orange;
+      case 'alta':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildStatusIndicator(String status) {
