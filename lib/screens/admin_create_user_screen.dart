@@ -13,7 +13,6 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
   final _emailController = TextEditingController();
   final _nombreCompletoController = TextEditingController();
   final _passwordController = TextEditingController();
-  //final _adminPasswordController = TextEditingController();
   String _rolSeleccionado = 'usuario';
 
   bool _isLoading = false;
@@ -25,7 +24,6 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
     _emailController.dispose();
     _nombreCompletoController.dispose();
     _passwordController.dispose();
-    //_adminPasswordController.dispose();
     super.dispose();
   }
 
@@ -38,19 +36,6 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
     });
 
     try {
-      /*
-      final admin = await AuthService().currentUser;
-      final adminUsername = admin?.username;
-      final adminPassword = _adminPasswordController.text.trim();
-
-      if (adminUsername == null || adminPassword.isEmpty) {
-        setState(() {
-          _errorMessage = 'Credenciales del administrador no válidas';
-        });
-        return;
-      }*/
-
-      // 2. Crear el nuevo usuario (esto cierra sesión del admin)
       final nuevoUsuario = await AuthService().registerUser(
         username: _usernameController.text.trim(),
         email: _emailController.text.trim(),
@@ -59,16 +44,9 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
         rol: _rolSeleccionado,
       );
 
-      /*
-      await AuthService().signInWithUsernameAndPassword(
-        adminUsername,
-        adminPassword,
-      );*/
-
-      // 4. Confirmación
       if (nuevoUsuario != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario creado exitosamente')),
+          const SnackBar(content: Text('Usuario creado exitosamente')),
         );
         Navigator.pop(context);
       }
@@ -83,81 +61,148 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF3B5998);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Crear Usuario')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: AppBar(
+        title: const Text('Crear Usuario'),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _nombreCompletoController,
-                  decoration: InputDecoration(labelText: 'Nombre completo'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Requerido' : null,
+          child: Column(
+            children: [
+              _buildInputField(
+                controller: _nombreCompletoController,
+                label: 'Nombre completo',
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Campo requerido'
+                            : null,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _usernameController,
+                label: 'Username',
+                validator:
+                    (value) =>
+                        value == null || value.isEmpty
+                            ? 'Campo requerido'
+                            : null,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _emailController,
+                label: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                validator:
+                    (value) =>
+                        value == null || !value.contains('@')
+                            ? 'Email inválido'
+                            : null,
+              ),
+              const SizedBox(height: 16),
+              _buildInputField(
+                controller: _passwordController,
+                label: 'Contraseña',
+                obscureText: true,
+                validator:
+                    (value) =>
+                        value != null && value.length >= 6
+                            ? null
+                            : 'Mínimo 6 caracteres',
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _rolSeleccionado,
+                decoration: InputDecoration(
+                  labelText: 'Rol',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Requerido' : null,
+                items:
+                    ['usuario', 'admin']
+                        .map(
+                          (rol) =>
+                              DropdownMenuItem(value: rol, child: Text(rol)),
+                        )
+                        .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _rolSeleccionado = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(labelText: 'Email'),
-                  validator: (value) => value == null || !value.contains('@')
-                      ? 'Email inválido'
-                      : null,
-                ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: InputDecoration(labelText: 'Contraseña'),
-                  obscureText: true,
-                  validator: (value) => value != null && value.length >= 6
-                      ? null
-                      : 'Mínimo 6 caracteres',
-                ),
-                SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  value: _rolSeleccionado,
-                  decoration: InputDecoration(labelText: 'Rol'),
-                  items: ['usuario', 'admin']
-                      .map((rol) => DropdownMenuItem(
-                            value: rol,
-                            child: Text(rol),
-                          ))
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => _rolSeleccionado = value ?? 'usuario'),
-                ),
-                SizedBox(height: 20),
-                if (_errorMessage != null)
-                  Text(_errorMessage!, style: TextStyle(color: Colors.red)),
-                SizedBox(height: 10),
-                /*SizedBox(height: 10),
-                TextFormField(
-                  controller: _adminPasswordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      labelText: 'Tu contraseña de administrador'),
-                  validator: (value) => value == null || value.isEmpty
-                      ? 'Ingresa tu contraseña para continuar'
-                      : null,
-                ),*/
-                _isLoading
-                    ? CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _crearUsuario,
-                        child: Text('Crear Usuario'),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _crearUsuario,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-              ],
-            ),
+                      child: const Text('Crear Usuario'),
+                    ),
+                  ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 18,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF3B5998), width: 2),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );

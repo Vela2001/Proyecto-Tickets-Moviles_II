@@ -8,59 +8,97 @@ class AdminUsersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF3B5998);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Administrar Usuarios')),
+      appBar: AppBar(
+        title: const Text('Administrar Usuarios'),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
+      ),
+      backgroundColor: const Color(0xFFF9FAFB),
       body: StreamBuilder<List<Usuario>>(
         stream: _usuarioService.obtenerUsuarios(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting)
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           if (!snapshot.hasData || snapshot.data!.isEmpty)
-            return Center(child: Text('No hay usuarios registrados'));
+            return const Center(child: Text('No hay usuarios registrados'));
 
           final usuarios = snapshot.data!;
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: usuarios.length,
             itemBuilder: (context, index) {
               final usuario = usuarios[index];
-              return ListTile(
-                title: Text(usuario.nombreCompleto),
-                subtitle: Text('${usuario.username} - ${usuario.rol}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        _mostrarFormularioEditar(context, usuario);
-                      },
+              return Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  title: Text(
+                    usuario.nombreCompleto,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async {
-                        final confirmar = await showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: Text('¿Eliminar usuario?'),
-                            content: Text(
-                                '¿Estás seguro de eliminar a ${usuario.nombreCompleto}?'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: Text('Cancelar')),
-                              TextButton(
-                                  onPressed: () => Navigator.pop(context, true),
-                                  child: Text('Eliminar')),
-                            ],
-                          ),
-                        );
-                        if (confirmar == true) {
-                          await _usuarioService.eliminarUsuario(usuario.id);
-                        }
-                      },
-                    ),
-                  ],
+                  ),
+                  subtitle: Text(
+                    '${usuario.username} - ${usuario.rol}',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.indigo),
+                        tooltip: 'Editar usuario',
+                        onPressed:
+                            () => _mostrarFormularioEditar(context, usuario),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        tooltip: 'Eliminar usuario',
+                        onPressed: () async {
+                          final confirmar = await showDialog(
+                            context: context,
+                            builder:
+                                (_) => AlertDialog(
+                                  title: const Text('¿Eliminar usuario?'),
+                                  content: Text(
+                                    '¿Estás seguro de eliminar a ${usuario.nombreCompleto}?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed:
+                                          () => Navigator.pop(context, false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                      ),
+                                      onPressed:
+                                          () => Navigator.pop(context, true),
+                                      child: const Text('Eliminar'),
+                                    ),
+                                  ],
+                                ),
+                          );
+                          if (confirmar == true) {
+                            await _usuarioService.eliminarUsuario(usuario.id);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -68,8 +106,11 @@ class AdminUsersScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 4,
         tooltip: 'Crear nuevo usuario',
+        child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
@@ -81,86 +122,101 @@ class AdminUsersScreen extends StatelessWidget {
   }
 
   void _mostrarFormularioEditar(BuildContext context, Usuario usuario) {
-    final nombreController =
-        TextEditingController(text: usuario.nombreCompleto);
+    final nombreController = TextEditingController(
+      text: usuario.nombreCompleto,
+    );
     final usernameController = TextEditingController(text: usuario.username);
     final emailController = TextEditingController(text: usuario.email);
     String rolSeleccionado = usuario.rol;
 
     showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text('Editar Usuario'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nombreController,
-                  decoration: InputDecoration(labelText: 'Nombre completo'),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: usernameController,
-                  decoration: InputDecoration(labelText: 'Username'),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(labelText: 'Correo electrónico'),
-                  readOnly: true,
-                  style: TextStyle(
-                      color: Colors.grey), // opcional, para que se vea inactivo
-                ),
-                SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  value: rolSeleccionado,
-                  decoration: InputDecoration(labelText: 'Rol'),
-                  items: ['usuario', 'admin'].map((rol) {
-                    return DropdownMenuItem(
-                      value: rol,
-                      child: Text(rol),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => rolSeleccionado = value);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              child: Text('Guardar'),
-              onPressed: () async {
-                final actualizado = Usuario(
-                  id: usuario.id,
-                  username: usernameController.text.trim(),
-                  email: usuario.email,
-                  nombreCompleto: nombreController.text.trim(),
-                  fechaCreacion: usuario.fechaCreacion,
-                  ultimoLogin: usuario.ultimoLogin,
-                  emailVerificado: usuario.emailVerificado,
-                  rol: rolSeleccionado,
-                );
+      builder:
+          (_) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: const Text('Editar Usuario'),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextField(
+                          controller: nombreController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre completo',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: usernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: emailController,
+                          readOnly: true,
+                          style: const TextStyle(color: Colors.grey),
+                          decoration: const InputDecoration(
+                            labelText: 'Correo electrónico',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: rolSeleccionado,
+                          decoration: const InputDecoration(
+                            labelText: 'Rol',
+                            border: OutlineInputBorder(),
+                          ),
+                          items:
+                              ['usuario', 'admin'].map((rol) {
+                                return DropdownMenuItem(
+                                  value: rol,
+                                  child: Text(rol),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => rolSeleccionado = value);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancelar'),
+                    ),
+                    ElevatedButton(
+                      child: const Text('Guardar'),
+                      onPressed: () async {
+                        final actualizado = Usuario(
+                          id: usuario.id,
+                          username: usernameController.text.trim(),
+                          email: usuario.email,
+                          nombreCompleto: nombreController.text.trim(),
+                          fechaCreacion: usuario.fechaCreacion,
+                          ultimoLogin: usuario.ultimoLogin,
+                          emailVerificado: usuario.emailVerificado,
+                          rol: rolSeleccionado,
+                        );
 
-                await _usuarioService.actualizarUsuario(actualizado);
-                Navigator.pop(context);
-                usernameController.dispose();
-                nombreController.dispose();
-                emailController.dispose();
-              },
-            ),
-          ],
-        ),
-      ),
+                        await _usuarioService.actualizarUsuario(actualizado);
+                        Navigator.pop(context);
+                        usernameController.dispose();
+                        nombreController.dispose();
+                        emailController.dispose();
+                      },
+                    ),
+                  ],
+                ),
+          ),
     );
   }
 }
