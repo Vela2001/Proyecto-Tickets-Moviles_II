@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'home_screen.dart';
+import 'package:proyecto_moviles2/screens/home_screen.dart';
 import 'admin_tickets_screen.dart';
 import 'register_screen.dart';
 
@@ -33,12 +33,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Buscar usuario por username
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .where('username', isEqualTo: username)
-          .limit(1)
-          .get();
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .where('username', isEqualTo: username)
+              .limit(1)
+              .get();
 
       if (querySnapshot.docs.isEmpty) {
         setState(() {
@@ -51,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final userDoc = querySnapshot.docs.first;
       final email = userDoc['email'] as String;
 
-      // Autenticación con Firebase usando email y contraseña
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -66,15 +65,16 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Obtener rol del usuario desde Firestore
-      final userSnapshot = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .get();
+      final userSnapshot =
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .doc(user.uid)
+              .get();
 
       if (!userSnapshot.exists) {
         setState(() {
-          _errorMessage = 'No se encontró información del usuario en la base de datos.';
+          _errorMessage =
+              'No se encontró información del usuario en la base de datos.';
           _isLoading = false;
         });
         return;
@@ -129,54 +129,146 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF3B5998);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Iniciar Sesión')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: 'Nombre de usuario',
-                border: OutlineInputBorder(),
+      backgroundColor: Colors.grey.shade100,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Logo asistente de soporte
+              Icon(
+                Icons.support_agent_outlined,
+                size: 100,
+                color: primaryColor,
               ),
-              textInputAction: TextInputAction.next,
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Contraseña',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              onSubmitted: (_) => _login(),
-            ),
-            if (_errorMessage != null) ...[
-              SizedBox(height: 16),
+
+              const SizedBox(height: 24),
+
+              // Título Bienvenido
               Text(
-                _errorMessage!,
-                style: TextStyle(color: Colors.red),
+                'Bienvenido',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                  letterSpacing: 1.2,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Subtítulo
+              Text(
+                'Inicia sesión para continuar',
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              ),
+
+              const SizedBox(height: 32),
+
+              _buildTextField(
+                controller: _usernameController,
+                labelText: 'Nombre de usuario',
+                prefixIcon: Icons.person,
+                textInputAction: TextInputAction.next,
+                textColor: Colors.black, // aquí ponemos negro
+              ),
+              const SizedBox(height: 20),
+              _buildTextField(
+                controller: _passwordController,
+                labelText: 'Contraseña',
+                prefixIcon: Icons.lock,
+                obscureText: true,
+                onSubmitted: (_) => _login(),
+                textColor: Colors.black, // aquí también negro
+              ),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              const SizedBox(height: 32),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 5,
+                      ),
+                      onPressed: _login,
+                      child: const Text(
+                        'Iniciar Sesión',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                  ),
+              const SizedBox(height: 24),
+              TextButton(
+                onPressed: _navigateToRegister,
+                child: Text(
+                  '¿No tienes cuenta? Regístrate aquí',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
-            SizedBox(height: 24),
-            _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                    ),
-                    child: Text('Iniciar Sesión'),
-                  ),
-            SizedBox(height: 16),
-            TextButton(
-              onPressed: _navigateToRegister,
-              child: Text('¿No tienes cuenta? Regístrate aquí'),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData prefixIcon,
+    bool obscureText = false,
+    TextInputAction? textInputAction,
+    void Function(String)? onSubmitted,
+    Color textColor = Colors.black, // texto negro por defecto
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      textInputAction: textInputAction,
+      onSubmitted: onSubmitted,
+      style: TextStyle(color: textColor),
+      decoration: InputDecoration(
+        floatingLabelStyle: TextStyle(color: Colors.black),
+        labelText: labelText,
+        prefixIcon: Icon(prefixIcon),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: const Color(0xFF3B5998), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
     );
   }

@@ -35,12 +35,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // 1. Verificar si el username ya existe
-      final usernameQuery = await FirebaseFirestore.instance
-          .collection('usuarios')
-          .where('username', isEqualTo: _usernameController.text.trim())
-          .limit(1)
-          .get();
+      // Verificar si el username ya existe
+      final usernameQuery =
+          await FirebaseFirestore.instance
+              .collection('usuarios')
+              .where('username', isEqualTo: _usernameController.text.trim())
+              .limit(1)
+              .get();
 
       if (usernameQuery.docs.isNotEmpty) {
         throw FirebaseAuthException(
@@ -49,26 +50,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
 
-      // 2. Crear usuario en Firebase Auth
-      final userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
+      // Crear usuario en Firebase Auth
+      final userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
 
-      // 3. Guardar información adicional en Firestore
+      // Guardar información adicional en Firestore
       await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(userCredential.user!.uid)
           .set({
-        'username': _usernameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'nombreCompleto': _nombreCompletoController.text.trim(),
-        'fechaCreacion': FieldValue.serverTimestamp(),
-        'rol': 'usuario',
-      });
+            'username': _usernameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'nombreCompleto': _nombreCompletoController.text.trim(),
+            'fechaCreacion': FieldValue.serverTimestamp(),
+            'rol': 'usuario',
+          });
 
-      // 4. Navegar al home después de registro exitoso
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -107,122 +107,170 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF3B5998);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Registro')),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.grey.shade100,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
           child: Form(
             key: _formKey,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TextFormField(
+                Icon(
+                  Icons.account_circle_outlined,
+                  size: 100,
+                  color: primaryColor,
+                ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  'Crear Cuenta',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  'Regístrate para comenzar',
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                ),
+
+                const SizedBox(height: 32),
+
+                _buildTextField(
                   controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: 'Nombre de usuario',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa un nombre de usuario';
-                    }
-                    if (value.length < 4) {
-                      return 'El nombre debe tener al menos 4 caracteres';
-                    }
-                    return null;
-                  },
+                  labelText: 'Nombre de usuario',
+                  prefixIcon: Icons.person,
+                  textInputAction: TextInputAction.next,
                 ),
-                SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: 20),
+                _buildTextField(
                   controller: _nombreCompletoController,
-                  decoration: InputDecoration(
-                    labelText: 'Nombre completo',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa tu nombre completo';
-                    }
-                    return null;
-                  },
+                  labelText: 'Nombre completo',
+                  prefixIcon: Icons.badge,
+                  textInputAction: TextInputAction.next,
                 ),
-                SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: 20),
+                _buildTextField(
                   controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Correo electrónico',
-                    border: OutlineInputBorder(),
-                  ),
+                  labelText: 'Correo electrónico',
+                  prefixIcon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa un correo';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Ingresa un correo válido';
-                    }
-                    return null;
-                  },
+                  textInputAction: TextInputAction.next,
                 ),
-                SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: 20),
+                _buildTextField(
                   controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    border: OutlineInputBorder(),
-                  ),
+                  labelText: 'Contraseña',
+                  prefixIcon: Icons.lock,
                   obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingresa una contraseña';
-                    }
-                    if (value.length < 6) {
-                      return 'La contraseña debe tener al menos 6 caracteres';
-                    }
-                    return null;
-                  },
+                  textInputAction: TextInputAction.next,
                 ),
-                SizedBox(height: 16),
-                TextFormField(
+                const SizedBox(height: 20),
+                _buildTextField(
                   controller: _confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirmar contraseña',
-                    border: OutlineInputBorder(),
-                  ),
+                  labelText: 'Confirmar contraseña',
+                  prefixIcon: Icons.lock_outline,
                   obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor confirma tu contraseña';
-                    }
-                    return null;
-                  },
                 ),
+
                 if (_errorMessage != null) ...[
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     _errorMessage!,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
-                SizedBox(height: 24),
+
+                const SizedBox(height: 32),
+
                 _isLoading
-                    ? CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: _register,
+                    ? const CircularProgressIndicator()
+                    : SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
+                          backgroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
                         ),
-                        child: Text('Registrarse'),
+                        onPressed: _register,
+                        child: const Text(
+                          'Registrarse',
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
                       ),
-                SizedBox(height: 16),
+                    ),
+
+                const SizedBox(height: 24),
+
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('¿Ya tienes cuenta? Inicia sesión'),
+                  child: Text(
+                    '¿Ya tienes cuenta? Inicia sesión',
+                    style: TextStyle(
+                      color: primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData prefixIcon,
+    bool obscureText = false,
+    TextInputAction? textInputAction,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      style: const TextStyle(color: Colors.black),
+      decoration: InputDecoration(
+        floatingLabelStyle: const TextStyle(color: Colors.black),
+        labelText: labelText,
+        prefixIcon: Icon(prefixIcon),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: const Color(0xFF3B5998), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
     );
   }
@@ -233,6 +281,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _nombreCompletoController.dispose();
     super.dispose();
   }
 }

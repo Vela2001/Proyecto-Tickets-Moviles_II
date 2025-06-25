@@ -16,6 +16,8 @@ class _AdminTicketDetailScreenState extends State<AdminTicketDetailScreen> {
   String _estado = '';
   String _prioridad = '';
 
+  final primaryColor = const Color(0xFF3B5998);
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +32,7 @@ class _AdminTicketDetailScreenState extends State<AdminTicketDetailScreen> {
     super.dispose();
   }
 
-  void _guardarCambios() async {
+  Future<void> _guardarCambios() async {
     final actualizado = Ticket(
       id: widget.ticket.id,
       titulo: _tituloController.text.trim(),
@@ -51,35 +53,106 @@ class _AdminTicketDetailScreenState extends State<AdminTicketDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Editar Ticket')),
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: AppBar(
+        title: const Text('Editar Ticket'),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 3,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            TextField(
-              controller: _tituloController,
-              decoration: InputDecoration(labelText: 'Título'),
-            ),
-            DropdownButton<String>(
+            _buildInputField(controller: _tituloController, label: 'Título'),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
               value: _estado,
-              items: ['pendiente', 'en_proceso', 'resuelto']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
+              decoration: InputDecoration(
+                labelText: 'Estado',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              items:
+                  ['pendiente', 'en_proceso', 'resuelto']
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.toUpperCase()),
+                        ),
+                      )
+                      .toList(),
               onChanged: (val) => setState(() => _estado = val!),
             ),
-            DropdownButton<String>(
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
               value: _prioridad,
-              items: ['baja', 'media', 'alta']
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
+              decoration: InputDecoration(
+                labelText: 'Prioridad',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              items:
+                  ['baja', 'media', 'alta']
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.toUpperCase()),
+                        ),
+                      )
+                      .toList(),
               onChanged: (val) => setState(() => _prioridad = val!),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _guardarCambios,
-              child: Text('Guardar'),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _guardarCambios,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                child: const Text('Guardar Cambios'),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 18,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: primaryColor, width: 2),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );
