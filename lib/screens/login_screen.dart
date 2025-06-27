@@ -139,20 +139,16 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: Image.asset(
-                  'assets/usuario.png',
-                  width: 140,
-                  height: 140,
-                  fit: BoxFit.contain,
-                ),
+              // Logo asistente de soporte
+              Icon(
+                Icons.support_agent_outlined,
+                size: 100,
+                color: primaryColor,
               ),
-              const SizedBox(height: 24),
 
               const SizedBox(height: 24),
 
-              const SizedBox(height: 24),
+              // Título Bienvenido
               Text(
                 'Bienvenido',
                 style: TextStyle(
@@ -162,18 +158,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   letterSpacing: 1.2,
                 ),
               ),
+
               const SizedBox(height: 8),
+
+              // Subtítulo
               Text(
                 'Inicia sesión para continuar',
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
               ),
+
               const SizedBox(height: 32),
+
               _buildTextField(
                 controller: _usernameController,
                 labelText: 'Nombre de usuario',
                 prefixIcon: Icons.person,
                 textInputAction: TextInputAction.next,
-                textColor: Colors.black,
+                textColor: Colors.black, // aquí ponemos negro
               ),
               const SizedBox(height: 20),
               _buildTextField(
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 prefixIcon: Icons.lock,
                 obscureText: true,
                 onSubmitted: (_) => _login(),
-                textColor: Colors.black,
+                textColor: Colors.black, // aquí también negro
               ),
               if (_errorMessage != null) ...[
                 const SizedBox(height: 16),
@@ -241,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool obscureText = false,
     TextInputAction? textInputAction,
     void Function(String)? onSubmitted,
-    Color textColor = Colors.black,
+    Color textColor = Colors.black, // texto negro por defecto
   }) {
     return TextField(
       controller: controller,

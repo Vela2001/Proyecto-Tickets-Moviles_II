@@ -134,7 +134,11 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
+<<<<<<< HEAD
                 hintText: 'Buscar por título, descripción o usuario',
+=======
+                hintText: 'Buscar por título o usuario',
+>>>>>>> 760061d761b69cab62a4be275d4ec36b90d8c939
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
                 fillColor: Colors.white,
@@ -318,6 +322,7 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
                           ),
                         ],
                       ),
+<<<<<<< HEAD
                       const SizedBox(height: 6),
                       Text(
                         ticket.descripcion,
@@ -328,6 +333,8 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
+=======
+>>>>>>> 760061d761b69cab62a4be275d4ec36b90d8c939
                     ],
                   ),
                 ),
