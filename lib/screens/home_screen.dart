@@ -7,7 +7,7 @@ import 'package:proyecto_moviles2/screens/view_tickets_screen.dart';
 import 'package:proyecto_moviles2/screens/admin_tickets_screen.dart';
 import 'package:proyecto_moviles2/services/ticket_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatefulWidget({super.key}) {
   const HomeScreen({super.key});
 
   @override

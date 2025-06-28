@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles2/model/ticket_model.dart';
 
-class DashboardWidget extends StatelessWidget {
+class DashboardWidget extends StatelessWidget({super.key}) {
   final List<Ticket> tickets;
 
   const DashboardWidget({super.key, required this.tickets});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles2/services/auth_service.dart';
 
-class AdminCreateUserScreen extends StatefulWidget {
+class AdminCreateUserScreen extends StatefulWidget({super.key}) {
   const AdminCreateUserScreen({super.key});
 
   @override
@@ -45,7 +45,7 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
         rol: _rolSeleccionado,
       );
 
-      if (nuevoUsuario != null) {
+      if (nuevoUsuario) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Usuario creado exitosamente')),
         );
@@ -115,7 +115,7 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
                 obscureText: true,
                 validator:
                     (value) =>
-                        value != null && value.length >= 6
+                        value && value.length >= 6
                             ? null
                             : 'Mínimo 6 caracteres',
               ),
@@ -138,13 +138,13 @@ class _AdminCreateUserScreenState extends State<AdminCreateUserScreen> {
                         )
                         .toList(),
                 onChanged: (value) {
-                  if (value != null) {
+                  if (value) {
                     setState(() => _rolSeleccionado = value);
                   }
                 },
               ),
               const SizedBox(height: 20),
-              if (_errorMessage != null)
+              if (_errorMessage)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text(
