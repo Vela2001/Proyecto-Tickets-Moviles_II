@@ -8,6 +8,8 @@ import 'package:proyecto_moviles2/screens/admin_tickets_screen.dart';
 import 'package:proyecto_moviles2/services/ticket_service.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -222,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showSearchDialog(BuildContext context) {
-    final TextEditingController _searchController = TextEditingController();
+    final TextEditingController searchController = TextEditingController();
 
     showDialog(
       context: context,
@@ -233,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: _searchController,
+                  controller: searchController,
                   decoration: const InputDecoration(
                     labelText: 'Título del Ticket',
                     hintText: 'Ingrese el título del ticket',
@@ -246,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () async {
-                    final searchQuery = _searchController.text.trim();
+                    final searchQuery = searchController.text.trim();
                     if (searchQuery.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

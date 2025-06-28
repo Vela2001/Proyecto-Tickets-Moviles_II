@@ -5,6 +5,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart'; // para acceder a la key
 import 'package:proyecto_moviles2/services/ticket_service.dart';
 
 class CreateTicketScreen extends StatefulWidget {
+  const CreateTicketScreen({super.key});
+
   @override
   _CreateTicketScreenState createState() => _CreateTicketScreenState();
 }
@@ -290,8 +292,9 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
     String description,
   ) async {
     final apiKey = dotenv.env['HUGGINGFACE_API_KEY'] ?? '';
-    if (apiKey.isEmpty)
+    if (apiKey.isEmpty) {
       throw Exception('API Key de Hugging Face no configurada.');
+    }
 
     final response = await http.post(
       Uri.parse(

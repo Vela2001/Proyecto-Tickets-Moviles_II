@@ -6,6 +6,8 @@ import 'package:proyecto_moviles2/screens/admin_create_user_screen.dart';
 class AdminUsersScreen extends StatelessWidget {
   final UsuarioService _usuarioService = UsuarioService();
 
+  AdminUsersScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = const Color(0xFF3B5998);
@@ -21,10 +23,12 @@ class AdminUsersScreen extends StatelessWidget {
       body: StreamBuilder<List<Usuario>>(
         stream: _usuarioService.obtenerUsuarios(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          if (!snapshot.hasData || snapshot.data!.isEmpty)
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No hay usuarios registrados'));
+          }
 
           final usuarios = snapshot.data!;
           return ListView.builder(

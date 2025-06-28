@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:proyecto_moviles2/services/auth_service.dart';
-import 'package:proyecto_moviles2/model/usuario_model.dart';
 
 class AdminCreateUserScreen extends StatefulWidget {
+  const AdminCreateUserScreen({super.key});
+
   @override
   _AdminCreateUserScreenState createState() => _AdminCreateUserScreenState();
 }

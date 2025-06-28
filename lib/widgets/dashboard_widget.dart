@@ -5,7 +5,7 @@ import 'package:proyecto_moviles2/model/ticket_model.dart';
 class DashboardWidget extends StatelessWidget {
   final List<Ticket> tickets;
 
-  DashboardWidget({required this.tickets});
+  const DashboardWidget({super.key, required this.tickets});
 
   @override
   Widget build(BuildContext context) {

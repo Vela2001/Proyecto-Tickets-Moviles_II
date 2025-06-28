@@ -4,7 +4,7 @@ import 'package:proyecto_moviles2/services/ticket_service.dart';
 
 class AdminTicketDetailScreen extends StatefulWidget {
   final Ticket ticket;
-  AdminTicketDetailScreen({required this.ticket});
+  const AdminTicketDetailScreen({super.key, required this.ticket});
 
   @override
   _AdminTicketDetailScreenState createState() =>

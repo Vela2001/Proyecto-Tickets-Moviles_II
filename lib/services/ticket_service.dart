@@ -161,7 +161,7 @@ class TicketService {
         .where('titulo', isGreaterThanOrEqualTo: titulo)
         .where('titulo',
             isLessThanOrEqualTo:
-                titulo + '\uf8ff') // Para buscar coincidencias parciales
+                '$titulo\uf8ff') // Para buscar coincidencias parciales
         .snapshots()
         .handleError(
             (error) => throw Exception('Error al buscar tickets: $error'))

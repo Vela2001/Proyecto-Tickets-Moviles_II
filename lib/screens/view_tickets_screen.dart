@@ -6,8 +6,6 @@ import 'package:proyecto_moviles2/services/ticket_service.dart';
 import 'package:proyecto_moviles2/screens/create_ticket_screen.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:open_filex/open_filex.dart'; // No olvides instalarlo
 
@@ -15,8 +13,7 @@ class ViewTicketsScreen extends StatefulWidget {
   final String userId;
   final List<Ticket>? tickets;
 
-  const ViewTicketsScreen({Key? key, required this.userId, this.tickets})
-    : super(key: key);
+  const ViewTicketsScreen({super.key, required this.userId, this.tickets});
 
   @override
   State<ViewTicketsScreen> createState() => _ViewTicketsScreenState();
@@ -146,12 +143,12 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
               vertical: 12,
             ),
             leading:
-                (ticket.prioridad != null && ticket.prioridad!.isNotEmpty)
+                (ticket.prioridad.isNotEmpty)
                     ? Container(
                       width: 16,
                       height: 16,
                       decoration: BoxDecoration(
-                        color: _getPriorityColor(ticket.prioridad!),
+                        color: _getPriorityColor(ticket.prioridad),
                         shape: BoxShape.circle,
                       ),
                     )
@@ -186,14 +183,13 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
                     Text('Creado: ${_dateFormat.format(ticket.fechaCreacion)}'),
                   ],
                 ),
-                if (ticket.prioridad != null &&
-                    ticket.prioridad!.isNotEmpty) ...[
+                if (ticket.prioridad.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       const Icon(Icons.bolt, size: 16, color: Colors.orange),
                       const SizedBox(width: 4),
-                      Text('Prioridad: ${_capitalize(ticket.prioridad!)}'),
+                      Text('Prioridad: ${_capitalize(ticket.prioridad)}'),
                     ],
                   ),
                 ],
@@ -326,13 +322,12 @@ class _ViewTicketsScreenState extends State<ViewTicketsScreen> {
                     pw.Text(_capitalize(ticket.estado)),
                     pw.SizedBox(height: 10),
 
-                    if (ticket.prioridad != null &&
-                        ticket.prioridad!.isNotEmpty) ...[
+                    if (ticket.prioridad.isNotEmpty) ...[
                       pw.Text(
                         'Prioridad:',
                         style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                       ),
-                      pw.Text(_capitalize(ticket.prioridad!)),
+                      pw.Text(_capitalize(ticket.prioridad)),
                     ],
                   ],
                 ),

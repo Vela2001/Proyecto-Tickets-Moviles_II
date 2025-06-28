@@ -8,6 +8,8 @@ import 'package:proyecto_moviles2/screens/admin_users_screen.dart';
 import 'package:proyecto_moviles2/widgets/dashboard_widget.dart';
 
 class AdminTicketsScreen extends StatefulWidget {
+  const AdminTicketsScreen({super.key});
+
   @override
   _AdminTicketsScreenState createState() => _AdminTicketsScreenState();
 }
@@ -134,11 +136,7 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-<<<<<<< HEAD
                 hintText: 'Buscar por título, descripción o usuario',
-=======
-                hintText: 'Buscar por título o usuario',
->>>>>>> 760061d761b69cab62a4be275d4ec36b90d8c939
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
                 fillColor: Colors.white,
@@ -322,7 +320,6 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
                           ),
                         ],
                       ),
-<<<<<<< HEAD
                       const SizedBox(height: 6),
                       Text(
                         ticket.descripcion,
@@ -333,8 +330,6 @@ class _AdminTicketsScreenState extends State<AdminTicketsScreen> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-=======
->>>>>>> 760061d761b69cab62a4be275d4ec36b90d8c939
                     ],
                   ),
                 ),
