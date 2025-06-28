@@ -92,4 +92,3 @@ El sistema sigue un enfoque **cliente-servidor** con una arquitectura modular qu
 
 
 
-
