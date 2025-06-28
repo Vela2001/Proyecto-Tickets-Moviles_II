@@ -1,95 +1,58 @@
-# 📱 Aplicativo Móvil de Gestión de Tickets de Soporte - MDP
+Informe de Examen - Unidad III
+Nombre del curso: Desarrollo de Aplicaciones Móviles
+Fecha: [DD/MM/AAAA]
+Nombres completos del estudiante: [Nombre Apellido]
 
-Este proyecto corresponde al desarrollo de una solución tecnológica orientada a mejorar la gestión de solicitudes técnicas dentro de la **Municipalidad Distrital de Pocollay (MDP)**. Se trata de una aplicación móvil multiplataforma desarrollada con **Flutter** y respaldada por **Firebase**, enfocada en optimizar el registro, seguimiento y resolución de incidencias internas.
+🔗 URL del Repositorio en GitHub
+📌 https://github.com/[TU_USUARIO]/SM2_ExamenUnidad3
 
----
+📸 Capturas de Pantalla
+1. Estructura de Carpetas .github/workflows/
+https://via.placeholder.com/600x300?text=Carpeta+.github%252Fworkflows+con+quality-check.yml
+(Se muestra la ubicación correcta del archivo quality-check.yml dentro de .github/workflows/.)
 
-## 🎯 Objetivo General
+2. Contenido del Archivo quality-check.yml
+https://via.placeholder.com/600x300?text=Contenido+de+quality-check.yml
+(Se evidencia el código YAML configurado para análisis y pruebas automáticas.)
 
-Diseñar e implementar un sistema móvil que permita gestionar de forma centralizada y eficiente los tickets de soporte técnico reportados por el personal de la MDP, asegurando mayor trazabilidad, rapidez en la atención y calidad del servicio.
+3. Ejecución del Workflow en GitHub Actions
+https://via.placeholder.com/600x300?text=Workflow+ejecut%C3%A1ndose+en+la+pesta%C3%B1a+Actions
+(Workflow exitoso con todos los pasos en verde y 100% de pruebas aprobadas.)
 
----
+📝 Explicación de lo Realizado
+1. Configuración del Repositorio
+Se creó un repositorio público en GitHub con el nombre exacto SM2_ExamenUnidad3.
 
-## ✅ Funcionalidades Principales
+Se copió el proyecto móvil desarrollado durante el curso.
 
-- Autenticación de usuarios y administradores.
-- Registro de tickets por parte de los empleados municipales.
-- Seguimiento del estado de los tickets y notificaciones automáticas.
-- Panel administrativo para gestión, priorización y cierre de incidencias.
-- Generación de reportes y estadísticas de atención.
-- Exportación de tickets en PDF.
+2. Implementación del Workflow
+Se creó el archivo quality-check.yml en .github/workflows/ con el siguiente flujo:
 
----
+Trigger: Se ejecuta automáticamente en cada push o pull request a la rama main.
 
-## 🧑‍💻 Tecnologías Utilizadas
+Pasos:
 
-| Componente        | Herramienta / Tecnología      |
-|-------------------|-------------------------------|
-| Framework         | Flutter (Dart)                |
-| Backend & Auth    | Firebase Authentication       |
-| Base de Datos     | Firebase Firestore (NoSQL)    |
-| Notificaciones    | Firebase Cloud Messaging      |
-| Control de versiones | Git + GitHub               |
-| IDE               | Android Studio / VS Code      |
+Configuración de Flutter (versión 3.19.0).
 
----
+Instalación de dependencias (flutter pub get).
 
-## 🧠 Arquitectura del Sistema
+Análisis de código (flutter analyze).
 
-El sistema sigue un enfoque **cliente-servidor** con una arquitectura modular que favorece la escalabilidad y el mantenimiento. Entre sus principales componentes se incluyen:
+Ejecución de pruebas unitarias (flutter test).
 
-- **Frontend:** Interfaz gráfica intuitiva y responsiva.
-- **Backend:** Gestión de lógica de negocio y validaciones.
-- **Base de Datos:** Almacenamiento estructurado en Firestore.
-- **Notificaciones:** Envío en tiempo real sobre el estado del ticket.
+3. Pruebas Unitarias
+Se implementaron 3 pruebas en main_test.dart para validar:
 
----
+División de strings con split().
 
-## 📌 Público Objetivo
+Eliminación de espacios con trim().
 
-- **Usuarios Generales:** Empleados de la MDP que reportan incidencias.
-- **Administradores:** Personal del área de TI encargado de gestionar tickets, usuarios y estadísticas del sistema.
+Conversión de strings a enteros con int.parse().
 
----
+4. Verificación
+El workflow se ejecutó correctamente en GitHub Actions.
 
-## 📦 Alcance
-
-- Funciona en dispositivos móviles Android y navegadores web como PWA.
-- No contempla integración con sistemas externos en esta versión.
-- Enfoque inicial en soporte técnico interno de la municipalidad.
-
----
-
-## 🔐 Seguridad
-
-- Acceso basado en roles (RBAC).
-- Validaciones en formularios.
-- Control de acceso mediante autenticación Firebase.
-- Cumplimiento con la Ley de Protección de Datos Personales (N.º 29733).
-
----
-
-## 📊 Impacto Esperado
-
-- Reducción del tiempo promedio de atención en un 25%.
-- Incremento de eficiencia operativa en un 30%.
-- Mejora significativa en la trazabilidad y satisfacción de usuarios internos.
-
----
-
-## 👥 Equipo de Desarrollo
-
-| Nombre                        | Rol                            |
-|------------------------------|---------------------------------|
-| Rodrigo Martin De La Cruz    | Jefe de Proyecto / Desarrollador |
-| Abraham Jesús Vela Vargas    | Programador / QA                |
-| Juan Jose Perez Vizcarra     | Integrador Firebase             |
-| Raúl Marcelo Cuadros Napa    | UI/UX Designer                  |
-| Marjiory Grace Llantay Machaca | QA Tester                     |
-| Cristian Aldair Quispe Levano| Documentación y Soporte         |
-
----
-
+Todos los pasos (analyze y test) fueron exitosos (100% passed).
 
 
 
